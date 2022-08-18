@@ -213,6 +213,7 @@ export const loadModule = async (targetModule: StarkModule, sandbox?: ISandbox) 
 
   let moduleSandbox = null;
 
+  // 根据name, 缓存起来了--最有可能加载多个microModule实例时，sandbox失效的地方
   if (!importModules[name]) {
     let deps = null;
     if (runtime) {
@@ -221,6 +222,7 @@ export const loadModule = async (targetModule: StarkModule, sandbox?: ISandbox) 
 
     const { jsList, cssList } = parseUrlAssets(url);
     moduleSandbox = createSandbox(sandbox, deps);
+    // 获取到module的输出，function，mount/unmount
     const moduleInfo = await moduleLoader.execModule({ name, url: jsList }, moduleSandbox, deps);
     importModules[name] = {
       moduleInfo,
@@ -229,6 +231,7 @@ export const loadModule = async (targetModule: StarkModule, sandbox?: ISandbox) 
     };
   }
 
+  // 这里直接从缓存中取出脚本中导出的东西
   const { moduleInfo, moduleCSS } = importModules[name];
 
   if (!moduleInfo) {
@@ -255,6 +258,7 @@ export const loadModule = async (targetModule: StarkModule, sandbox?: ISandbox) 
     console.warn('[icestark module] The export function name called component is conflict, please change it or it will be ignored.');
   }
 
+  // mount/unmount/component本身是必须的，所以这里明确返回
   return {
     ...moduleInfo,
     mount,

@@ -17,6 +17,8 @@ export default class ModuleLoader {
 
   load(starkModule: StarkModule, fetch: Fetch = window.fetch): Promise<string[]> {
     const { url, name } = starkModule;
+    // 对同一个名称的会进行缓存直接返回缓存结果
+    // 返回的是一个promise数组对象通过await可以直接获取到值，为一个字符串
     if (this.importTask[name]) {
       // return promise if current module is pending or resolved
       return this.importTask[name];
@@ -43,12 +45,17 @@ export default class ModuleLoader {
   }
 
   execModule(starkModule: StarkModule, sandbox?: Sandbox, deps?: object) {
+    // sources是返回的脚本字符串数组
     return this.load(starkModule).then((sources) => {
       let globalWindow = null;
+      // 其实这里应该是判断sandbox是否是Sandbox的实例，感觉写的并不是很清晰
       if (sandbox?.getSandbox) {
+        // 根据deps创建一个proxy
         sandbox.createProxySandbox(deps);
+        // globalWindow其实就是创建的proxy对象
         globalWindow = sandbox.getSandbox();
       } else {
+        // 不开启sandbox时，就是window本身
         globalWindow = window;
       }
       const { name } = starkModule;
@@ -56,12 +63,15 @@ export default class ModuleLoader {
       // excute script in order
       try {
         sources.forEach((source, index) => {
+          // 最后一个脚本
           const lastScript = index === sources.length - 1;
           if (lastScript) {
+            // 遍历一遍未运行source前的globalWindow上的属性
             noteGlobalProps(globalWindow);
           }
           // check sandbox
           if (sandbox?.execScriptInSandbox) {
+            // 在沙箱中运行JS脚本
             sandbox.execScriptInSandbox(source);
           } else {
             // https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval

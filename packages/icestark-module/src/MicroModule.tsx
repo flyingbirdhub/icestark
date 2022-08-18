@@ -93,6 +93,7 @@ export default class MicroModule extends React.Component<any, State> {
       this.setState({ loading: true });
 
       try {
+        // loadModule是有可能出现缓存的，所以这里会存在沙箱失效的情况
         const { mount, component } = await loadModule(this.moduleInfo, sandbox);
         const lifecycleMount = mount;
 

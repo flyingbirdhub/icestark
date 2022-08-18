@@ -105,6 +105,7 @@ export default class Sandbox {
           originalValues[p] = originalWindow[p];
         }
         // set new value to original window in case of jsonp, js bundle which will be execute outof sandbox
+        // multiMode开启后，沙箱内全局变量不会回写到全局的window上
         if (!multiMode) {
           originalWindow[p] = value;
         }

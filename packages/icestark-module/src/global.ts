@@ -20,7 +20,9 @@ export function getGlobalProp(globalWindow) {
   // eslint-disable-next-line no-restricted-syntax
   for (const p in globalWindow) {
     // do not check frames cause it could be removed during import
+    // 这段逻辑蛮奇怪的，不知道这样做的意义
     if (shouldSkipProperty(p, globalWindow)) { continue; }
+    // 0位置和1位置为什么要特殊判断呢
     if (cnt === 0 && p !== firstGlobalProp || cnt === 1 && p !== secondGlobalProp) { return p; }
     cnt++;
     lastProp = p;
